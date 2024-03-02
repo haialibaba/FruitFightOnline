@@ -1,1 +1,0 @@
-draw_button(button_width // 2 + 520, button_height // 2 + 80, 700, 50, WHITE, 10)
