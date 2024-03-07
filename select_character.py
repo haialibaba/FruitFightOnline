@@ -8,6 +8,7 @@ from os import listdir
 from os.path import isfile, join
 import item
 import character
+import main
 pygame.init()
 
 FPS = 60
@@ -27,14 +28,49 @@ LIGHTSKYBLUE = (135, 206, 250)
 background_image = pygame.image.load("assets/Background/choose_player.jpg")
 background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 font = pygame.font.Font(font_path, 36)
+font_name = pygame.font.Font(font_path, 28)
+font_charactername = pygame.font.Font(font_path, 18)
 
-
+def draw_input_box(x, y, width, height, text=''):
+    pygame.draw.rect(screen, WHITE, (x, y, width, height), 2)
+    input_text = font.render(text, True, BLACK)
+    screen.blit(input_text, (x + 5, y + 5))
 
 def draw_text(text, font, color, x, y, bold=True):
     text_surface = font.render(text, bold, color)
     text_rect = text_surface.get_rect()
     text_rect.center = (x, y)
     screen.blit(text_surface, text_rect)
+
+def draw_text_multiline(text, font, color, x, y, max_width, bold=True, line_spacing=0):
+    lines = []
+    words = text.split(' ')
+    current_line = ''
+    max_line_height = 0  # Biến để lưu trữ chiều cao lớn nhất của dòng
+    for word in words:
+        test_line = current_line + word + ' '
+        test_rect = font.render(test_line, bold, color).get_rect()
+        if test_rect.width > max_width:
+            lines.append(current_line.strip())
+            max_line_height = max(max_line_height, font.size(current_line.strip())[1])  # Cập nhật chiều cao lớn nhất
+            current_line = word + ' '
+        else:
+            current_line = test_line
+    lines.append(current_line.strip())
+    max_line_height = max(max_line_height, font.size(current_line.strip())[1])  # Cập nhật chiều cao lớn nhất
+
+    total_height = len(lines) * max_line_height  # Tính toán chiều cao tổng cộng của văn bản
+    # Y position for the first line
+    current_y = y - total_height // 2
+    for line in lines:
+        text_surface = font.render(line, bold, color)
+        text_rect = text_surface.get_rect()
+        text_rect.centerx = x
+        text_rect.y = current_y
+        screen.blit(text_surface, text_rect)
+        # Move to the next line position
+        current_y += max_line_height + line_spacing
+
 
 def draw_rounded_rect(surface, color, rect, radius, border=0):
     x, y, width, height = rect
@@ -47,12 +83,8 @@ def draw_button(x, y, width, height, color, radius, hovered=False):
         color = hover_color  # Thay đổi màu sắc khi hover
     draw_rounded_rect(screen, color, rect, radius)
 
-def draw_button_player(x, y, width, height, color, radius_left, radius_right, hovered=False):
+def draw_button_player(x, y, width, height, color, radius_left, radius_right):
     rect = pygame.Rect(x - width // 2, y - height // 2, width, height)
-    hover_color = (192, 192, 192)  # Xám
-    if hovered:
-        color = hover_color  # Thay đổi màu sắc khi hover
-
     # Vẽ phần bên trái của nút với bán kính cong
     left_rect = pygame.Rect(rect.left, rect.top, width // 2, height)
     pygame.draw.rect(screen, color, left_rect, border_radius=(radius_left, 0, 0, radius_left))
@@ -63,10 +95,6 @@ def draw_button_player(x, y, width, height, color, radius_left, radius_right, ho
 
     # Vẽ bánh xe bên trái của nút
     pygame.draw.circle(screen, color, (rect.left + radius_left, rect.top + radius_left), radius_left)
-
-    # Vẽ bánh xe bên phải của nút (chỉ vẽ khi đang hover)
-    if hovered:
-        pygame.draw.circle(screen, color, (rect.right - radius_right, rect.top + radius_right), radius_right)
 
 def draw_button_start(x, y, width, height, color, radius, hovered=False):
     rect = pygame.Rect(x - width // 2, y - height // 2, width, height)
@@ -107,9 +135,8 @@ def draw_character_animation(frames, position):
     frame_index = 0
     animation_speed = 0.1  # Tốc độ chuyển đổi giữa các frame
     last_frame_update = pygame.time.get_ticks()
-    running = True
 
-    while running:
+    while True:
         current_time = pygame.time.get_ticks()
         if current_time - last_frame_update >= animation_speed * 1000:
             frame_index += 1
@@ -124,11 +151,11 @@ def draw_character_animation(frames, position):
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
-                break
+                pygame.quit()
+                sys.exit()
 
-    # Kết thúc vòng lặp, trả về biến running để có thể kiểm soát ở phía main_menu()
-    return running
+        # Trả về biến cờ để kiểm soát trong hàm main_menu()
+        yield False
 
 
 def draw_button_with_image(image_path, x, y, width, height, hovered=False):
@@ -152,9 +179,35 @@ def draw_button_with_image(image_path, x, y, width, height, hovered=False):
     return button_rect
 
 
-def info_player():
-    draw_button(730, 190, 300, 60, YELLOW, 10)
-    draw_button(730, 350, 300, 220, YELLOW, 10)
+def info_player(chosen_character):
+    character_info = {
+        "MaskDude": {
+            "name": "MaskDude",
+            "description": "As the leader of a tribe hidden deep in the Amazon forest, he has fast movement speed and good accuracy, but in return his jumping ability is not very good."
+        },
+        "NinjaFrog": {
+            "name": "NinjaFrog",
+            "description": "NinjaFrog is a skilled ninja, moving quickly and silently. His agility and ability to jump very high make him a formidable opponent but he throws quite slowly due to his severe nearsightedness."
+        },
+        "PinkMan": {
+            "name": "PinkMan",
+            "description": "PinkMan is a mysterious character with incredible strength and resilience. He can throw fruit at a very fast speed and jump very high instead he is very slow."
+        },
+        "VirtualGuy": {
+            "name": "VirtualGuy",
+            "description": "VirtualGuy is a digital warrior with unparalleled computing power. He is very good at analysis and strategizing. His strengths are jumping high and running very fast"
+        }
+    }
+
+    draw_button(730, 190, 300, 60, WHITE, 10)
+    draw_button(730, 350, 400, 220, WHITE, 10)
+    
+    # Kiểm tra xem nhân vật đã được chọn có trong từ điển thông tin không
+    if chosen_character in character_info:
+        character_name = character_info[chosen_character]["name"]
+        character_description = character_info[chosen_character]["description"]
+        draw_text(character_name, font_charactername, GRAY, 735, 260)
+        draw_text_multiline(character_description, font_charactername, BLACK, 730, 330, 380)
 
 character_paths = {
     "MaskDude": "assets/MainCharacters/MaskDude/run.png",
@@ -162,15 +215,27 @@ character_paths = {
     "PinkMan": "assets/MainCharacters/PinkMan/run.png",
     "VirtualGuy": "assets/MainCharacters/VirtualGuy/run.png"
 }
+
+character_stats = {
+    "MaskDude": {"velocity": 6, "throw_speed": 200,"jump_high": 4},
+    "NinjaFrog": {"velocity": 8, "throw_speed": 450,"jump_high": 7},
+    "PinkMan": {"velocity": 4, "throw_speed": 100,"jump_high":6.3},
+    "VirtualGuy": {"velocity": 6.5, "throw_speed": 200,"jump_high":6},
+}
+
 def main_menu():
     chosen_character = None
+    input_text = ''
     running = True
-    button_clicked = False  # Biến cờ để chỉ ra liệu có nút nào được click hay không
+    clock = pygame.time.Clock()
+
+    frame_index = 0  # Biến để theo dõi khung hình hiện tại của hoạt ảnh
+    animation_speed = 0.1  # Tốc độ chuyển đổi giữa các khung hình
+    last_frame_update = pygame.time.get_ticks()  # Thời điểm cuối cùng cập nhật khung hình
 
     while running:
-        clock = pygame.time.Clock()
+        button_clicked = False
         screen.blit(background_image, (0, 0))
-
         draw_button(500, 320, 900, 500, LIGHTSKYBLUE, 10)
         draw_text("Fruit Fight Online", font, BLACK, 250, 120)
         draw_button(250, 350, 300, 380, YELLOW, 10)
@@ -180,17 +245,50 @@ def main_menu():
         button_rect3 = draw_button_with_image("assets/Background/button.png", 285, 200, 60, 60)
         button_rect4 = draw_button_with_image("assets/Background/button.png", 355, 200, 60, 60)
 
-        info_player()
+        info_player(chosen_character)
 
         draw_button_start(SCREEN_WIDTH - 200 // 2 - 120, SCREEN_HEIGHT - 50 // 2 - 90, 200, 50, WHITE, 10)
         draw_text("Start", font, BLACK, SCREEN_WIDTH - 200 // 2 - 120, SCREEN_HEIGHT - 50 // 2 - 90)
-
-        clock.tick(FPS)
         
+
+        # Vẽ nhân vật được chọn
+        if chosen_character:
+            character.Player.SPRITES = character.load_sprite_sheet("MainCharacters", chosen_character, 32, 32, True)
+            main.Player_VEL = character_stats[chosen_character]["velocity"]
+            main.speed_throw = character_stats[chosen_character]["throw_speed"]
+            character.Player_jump = character_stats[chosen_character]["jump_high"]
+            character_frames = load_animation_frames(chosen_character, 32, 32)
+            if character_frames:
+                current_time = pygame.time.get_ticks()
+                if current_time - last_frame_update >= animation_speed * 1000:
+                    frame_index += 1
+                    last_frame_update = current_time
+
+                frame_index %= len(character_frames)  # Đảm bảo frame_index không vượt quá số lượng khung hình
+                current_frame = character_frames[frame_index]
+                screen.blit(current_frame, (175, 310))
+        else:
+            character_frames = load_animation_frames("MaskDude", 32, 32)
+            info_player("MaskDude")
+            if character_frames:
+                current_time = pygame.time.get_ticks()
+                if current_time - last_frame_update >= animation_speed * 1000:
+                    frame_index += 1
+                    last_frame_update = current_time
+
+                frame_index %= len(character_frames)  # Đảm bảo frame_index không vượt quá số lượng khung hình
+                current_frame = character_frames[frame_index]
+                screen.blit(current_frame, (175, 310))
+
+        draw_text("NAME: ", font_name, BLACK, 650, 190)
+        draw_input_box(698, 161, 160, 40, input_text)
+        clock.tick(FPS)
         pygame.display.update()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                pygame.quit()
+                sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     mouse_pos = event.pos
@@ -206,23 +304,26 @@ def main_menu():
                     elif button_rect4.collidepoint(mouse_pos):
                         chosen_character = "VirtualGuy"
                         button_clicked = True
+                    elif SCREEN_WIDTH - 200 // 2 - 120 <= mouse_pos[0] <= SCREEN_WIDTH - 200 // 2 + 80 and \
+                   SCREEN_HEIGHT - 50 // 2 - 90 <= mouse_pos[1] <= SCREEN_HEIGHT - 50 // 2 - 40:
+                        if not input_text.strip():
+                            input_text = "Player"
+                        main.Player_name = input_text
+                        main.main(screen)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    input_text = input_text[:-1]
+                elif event.key == pygame.K_RETURN:
+                    print("Entered text:", input_text)
+                elif len(input_text) < 7:
+                    input_text += event.unicode
 
-        # Kiểm tra nếu có nút nào được click, thì cập nhật hoạt cảnh của nhân vật mới
+        pygame.display.flip()
+
         if button_clicked:
-            character_frames = load_animation_frames(chosen_character, 32, 32)
-            if character_frames:
-                running = draw_character_animation(character_frames, (175, 310))
-                if not running:
-                    break
-
-        button_clicked = False  # Đặt lại biến cờ
-        print("Before:", button_clicked)
-        button_clicked = False
-        print("After:", button_clicked)
-
-    pygame.quit()
-    sys.exit()
+            pygame.display.update()
+        
+        
 
 if __name__ == "__main__":
     main_menu()
-

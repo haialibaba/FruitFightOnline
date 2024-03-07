@@ -1,6 +1,6 @@
 import pygame
 import sys
-import main
+import select_character
 import option_page
 pygame.init()
 
@@ -84,7 +84,7 @@ def main_menu():
                     # Kiểm tra nếu con trỏ chuột nằm trên nút "Start"
                     if (SCREEN_WIDTH // 2 - button_width // 2 <= mouse_x <= SCREEN_WIDTH // 2 + button_width // 2 and
                         SCREEN_HEIGHT // 2 - button_height // 2 <= mouse_y <= SCREEN_HEIGHT // 2 + button_height // 2):
-                        main.main(screen)
+                        select_character.main_menu()
                     elif (SCREEN_WIDTH // 2 - button_width // 2 <= mouse_x <= SCREEN_WIDTH // 2 + button_width // 2 and
                           (SCREEN_HEIGHT // 2 + 100) - button_height // 2 <= mouse_y <= (SCREEN_HEIGHT // 2 + 100) + button_height // 2):
                         option_page.main_menu()

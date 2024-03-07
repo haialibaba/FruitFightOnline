@@ -5,12 +5,12 @@ import pygame
 from os import listdir
 from os.path import isfile, join
 import item
+font_path = "assets/font/anta.ttf"
 pygame.init()
 
 WIDTH, HEIGHT = 1000,640
 FPS = 60
-Player_VEL = 5
-
+Player_jump = 6
 window = pygame.display.set_mode((WIDTH,HEIGHT))
 
 def flip(sprites):
@@ -41,9 +41,9 @@ def load_sprite_sheet(dir1, dir2, width, height, direction = False):
 class Player(pygame.sprite.Sprite):
     COLOR = (255,0,0)
     GRAVITY = 1
-    SPRITES = load_sprite_sheet("MainCharacters","PinkMan", 32, 32, True)
+    SPRITES = load_sprite_sheet("MainCharacters","MaskDude", 32, 32, True)
     animation_delay = 3
-    def __init__(self,x,y,width,height):
+    def __init__(self,x,y,width,height,name):
         super().__init__()
         #thiết lập giá trị va chạm
         self.rect = pygame.Rect(x,y,width,height)
@@ -55,9 +55,11 @@ class Player(pygame.sprite.Sprite):
         self.animation_count = 0
         self.fall_count = 0
         self.jump_count = 0
+        self.name = name
+        self.font = pygame.font.SysFont('arial', 20)
 
     def jump(self):
-        self.y_vel = -self.GRAVITY * 6
+        self.y_vel = -self.GRAVITY * Player_jump
         self.animation_count = 0
         self.jump_count += 1
         #double jump
@@ -124,5 +126,12 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.sprite.get_rect(topleft=(self.rect.x, self.rect.y))
         self.mask = pygame.mask.from_surface(self.sprite)
     
+    def draw_name(self, window):
+        name_surface = self.font.render(self.name, True, (0, 0, 0))  # Tạo surface chứa tên
+        name_x = self.rect.x + (self.rect.width - name_surface.get_width()) // 2
+        name_y = self.rect.y - name_surface.get_height() - 5  
+        window.blit(name_surface, (name_x, name_y))
+
     def draw(self,window):
         window.blit(self.sprite,(self.rect.x, self.rect.y))
+        self.draw_name(window)
