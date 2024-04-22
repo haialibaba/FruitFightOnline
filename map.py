@@ -35,33 +35,39 @@ def get_background(name):
 
     return tiles, image
 
-def get_block(size):
+def get_block(size,block_y):
     path = join("assets","Terrain","Terrain.png")
     image = pygame.image.load(path).convert_alpha()
     surface = pygame.Surface((size,size), pygame.SRCALPHA, 32)
-    rect = pygame.Rect(96,0,size,size)
-    surface.blit(image,(0,0),rect)
-    return pygame.transform.scale2x(surface)
-
-def get_fruit(size):
-    path = join("assets","Items","Fruits","Apple.png")
-    image = pygame.image.load(path).convert_alpha()
-    surface = pygame.Surface((size,size), pygame.SRCALPHA, 32)
-    rect = pygame.Rect(96,0,size,size)
+    rect = pygame.Rect(96,block_y,size,size)
     surface.blit(image,(0,0),rect)
     return pygame.transform.scale2x(surface)
 
 class Block(Object):
-    def __init__(self,x,y,size): 
+    def __init__(self,x,y,size,block_y): 
         super().__init__(x,y,size,size)
-        block = get_block(size)
+        block = get_block(size,block_y)
         self.image.blit(block, (0,0))
         self.mask = pygame.mask.from_surface(self.image)
 
-class Fruit(Object):
+def get_box(size):
+    path = os.path.join("assets", "Items", "Boxes", "Box3", "Idle.png")
+    try:
+        box_image = pygame.image.load(path).convert_alpha()
+        box_image = pygame.transform.scale(box_image, size)
+        return box_image
+    except pygame.error as e:
+        print("Không thể tải ảnh từ:", path)
+        print("Lỗi:", e)
+        return None
+
+
+class Box(Object):
     def __init__(self,x,y,size): 
         super().__init__(x,y,size,size)
-        fruit = get_fruit(size)
-        self.image.blit(fruit, (0,0))
+        block = get_box((size, size))
+        self.image.blit(block, (0,0))
         self.mask = pygame.mask.from_surface(self.image)
+
+
 

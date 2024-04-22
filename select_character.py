@@ -3,6 +3,7 @@ import sys
 import os
 import random
 import math
+import trang_chu
 import pygame
 from os import listdir
 from os.path import isfile, join
@@ -15,7 +16,7 @@ FPS = 60
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 640
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Fruit Fight")
+pygame.display.set_caption("Fruit Fight1")
 font_path = "assets/font/anta.ttf"
 
 WHITE = (255, 255, 255)
@@ -24,7 +25,7 @@ RED = (255, 0, 0)
 GRAY = (128, 128, 128)
 YELLOW = (255, 255, 60)
 LIGHTSKYBLUE = (135, 206, 250)
-
+back_img = pygame.image.load("assets/Other/back.png")  # Điều chỉnh đường dẫn của tệp ảnh
 background_image = pygame.image.load("assets/Background/choose_player.jpg")
 background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
 font = pygame.font.Font(font_path, 36)
@@ -217,10 +218,10 @@ character_paths = {
 }
 
 character_stats = {
-    "MaskDude": {"velocity": 6, "throw_speed": 200,"jump_high": 4},
-    "NinjaFrog": {"velocity": 8, "throw_speed": 450,"jump_high": 7},
-    "PinkMan": {"velocity": 4, "throw_speed": 100,"jump_high":6.3},
-    "VirtualGuy": {"velocity": 6.5, "throw_speed": 200,"jump_high":6},
+    "MaskDude": {"velocity": 6, "throw_speed": 1300,"jump_high": 4},
+    "NinjaFrog": {"velocity": 8, "throw_speed": 1500,"jump_high": 7},
+    "PinkMan": {"velocity": 4, "throw_speed": 1000,"jump_high":6.3},
+    "VirtualGuy": {"velocity": 6.5, "throw_speed": 1300,"jump_high":6},
 }
 
 def main_menu():
@@ -282,6 +283,7 @@ def main_menu():
 
         draw_text("NAME: ", font_name, BLACK, 650, 190)
         draw_input_box(698, 161, 160, 40, input_text)
+        screen.blit(back_img, (20, 16))
         clock.tick(FPS)
         pygame.display.update()
 
@@ -304,12 +306,14 @@ def main_menu():
                     elif button_rect4.collidepoint(mouse_pos):
                         chosen_character = "VirtualGuy"
                         button_clicked = True
-                    elif SCREEN_WIDTH - 200 // 2 - 120 <= mouse_pos[0] <= SCREEN_WIDTH - 200 // 2 + 80 and \
-                   SCREEN_HEIGHT - 50 // 2 - 90 <= mouse_pos[1] <= SCREEN_HEIGHT - 50 // 2 - 40:
+                    elif 700 <= mouse_pos[0] <= 700 + 170 and \
+                    500 <= mouse_pos[1] <= 500 + 50:
                         if not input_text.strip():
                             input_text = "Player"
-                        main.Player_name = input_text
-                        main.main(screen)
+                        main.main(screen,chosen_character,input_text,15)
+                    elif 20 <= mouse_pos[0] <= 20 + 50 and \
+                    16 <= mouse_pos[1] <= 16 + 50:
+                        trang_chu.main_menu()
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
                     input_text = input_text[:-1]
@@ -319,11 +323,9 @@ def main_menu():
                     input_text += event.unicode
 
         pygame.display.flip()
-
+        
         if button_clicked:
             pygame.display.update()
-        
-        
 
 if __name__ == "__main__":
     main_menu()

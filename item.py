@@ -8,20 +8,19 @@ import main
 import map
 pygame.init()
 
+name_fruit="Melon"
 class Fruit(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height,Fruit_name):
         super().__init__()
         self.rect = pygame.Rect(x, y, width, height)
-        self.load_images(width, height)
         self.x_vel = 0
         self.y_vel = 0
+        self.Fruit_name = Fruit_name
+        sprites = self.load_sprite_sheet("Items", "Fruits", width, height) 
+        self.image = sprites[Fruit_name]  
 
     def draw(self, window):
         window.blit(self.image, self.rect)
-
-    def load_images(self, width, height):
-        sprites = self.load_sprite_sheet("Items", "Fruits", width, height) 
-        self.image = sprites['Melon']  
 
     def load_sprite_sheet(self, dir1, dir2, width, height):  # Thêm width và height vào đây
         path = join("assets", dir1, dir2)

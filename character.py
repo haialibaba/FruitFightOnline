@@ -5,6 +5,7 @@ import pygame
 from os import listdir
 from os.path import isfile, join
 import item
+import main
 font_path = "assets/font/anta.ttf"
 pygame.init()
 
@@ -43,7 +44,7 @@ class Player(pygame.sprite.Sprite):
     GRAVITY = 1
     SPRITES = load_sprite_sheet("MainCharacters","MaskDude", 32, 32, True)
     animation_delay = 3
-    def __init__(self,x,y,width,height,name):
+    def __init__(self,x,y,width,height,name,Fruit_name,lives):
         super().__init__()
         #thiết lập giá trị va chạm
         self.rect = pygame.Rect(x,y,width,height)
@@ -56,7 +57,10 @@ class Player(pygame.sprite.Sprite):
         self.fall_count = 0
         self.jump_count = 0
         self.name = name
+        self.Fruit_name = Fruit_name
         self.font = pygame.font.SysFont('arial', 20)
+        self.count_jump = 1
+        self.lives = lives
 
     def jump(self):
         self.y_vel = -self.GRAVITY * Player_jump
@@ -65,6 +69,8 @@ class Player(pygame.sprite.Sprite):
         #double jump
         if self.jump_count == 1:
             self.fall_count = 0
+        
+        
 
     def move(self,dx,dy):
         self.rect.x += dx
@@ -93,28 +99,28 @@ class Player(pygame.sprite.Sprite):
         self.fall_count += 1
         self.update_sprite()
 
-    def throw_fruit(self, fruits):
-        if self.direction == "left":
-            fruit = item.Fruit(self.rect.left, self.rect.top, 32, 32)
-            fruit.x_vel = -8  # Thiết lập vận tốc ban đầu của quả táo khi ném sang trái
-        elif self.direction == "right":
-            fruit = item.Fruit(self.rect.right, self.rect.top, 32, 32)
-            fruit.x_vel = 8   # Thiết lập vận tốc ban đầu của quả táo khi ném sang phải
-        fruits.append(fruit)
+    def send_coordinates_event(self,sprite_sheet):
+        pygame.event.post(pygame.event.Event(pygame.USEREVENT, {'x': self.rect.x, 'y': self.rect.y,'sprite': sprite_sheet}))
+        
 
     def update_sprite(self):
-        sprite_sheet =  "idle"
+        sprite_sheet = "idle"
         if self.y_vel != 0:
             if self.jump_count == 1:
                 sprite_sheet = "jump"
-            if self.jump_count == 2:
+                self.send_coordinates_event(sprite_sheet)
+            elif self.jump_count == 2:
                 sprite_sheet = "double_jump"
-
+                self.send_coordinates_event(sprite_sheet)
+                self.count_jump =2
         elif self.y_vel > self.GRAVITY * 2:
             sprite_sheet = "fall"
-
+            self.send_coordinates_event(sprite_sheet)
         elif self.x_vel != 0:
             sprite_sheet = "run"
+        elif self.count_jump == 2 :
+            self.send_coordinates_event("abc")
+            self.count_jump = 1
         sprite_sheet_name = sprite_sheet + "_" + self.direction
         sprites = self.SPRITES[sprite_sheet_name]
         sprite_index = (self.animation_count // self.animation_delay) % len(sprites)
@@ -135,3 +141,6 @@ class Player(pygame.sprite.Sprite):
     def draw(self,window):
         window.blit(self.sprite,(self.rect.x, self.rect.y))
         self.draw_name(window)
+        return self.rect.x, self.rect.y
+
+

@@ -1,7 +1,9 @@
 import pygame
 import sys
 import select_character
+import select_character_offline
 import option_page
+import select_PVB
 pygame.init()
 
 # Thiết lập cửa sổ game
@@ -55,22 +57,28 @@ def main_menu():
         start_hovered = (SCREEN_WIDTH // 2 - button_width // 2 <= mouse_x <= SCREEN_WIDTH // 2 + button_width // 2 and
                          SCREEN_HEIGHT // 2 - button_height // 2 <= mouse_y <= SCREEN_HEIGHT // 2 + button_height // 2)
         
+        PvP_hovered = (SCREEN_WIDTH // 2 - button_width // 2 <= mouse_x <= SCREEN_WIDTH // 2 + button_width // 2 and
+                         (SCREEN_HEIGHT // 2 + 85) - button_height // 2 <= mouse_y <= (SCREEN_HEIGHT // 2 + 85) + button_height // 2)
+        
         # Kiểm tra nếu con trỏ chuột nằm trên nút "About"
         about_hovered = (SCREEN_WIDTH // 2 - button_width // 2 <= mouse_x <= SCREEN_WIDTH // 2 + button_width // 2 and
-                         (SCREEN_HEIGHT // 2 + 100) - button_height // 2 <= mouse_y <= (SCREEN_HEIGHT // 2 + 100) + button_height // 2)
+                         (SCREEN_HEIGHT // 2 + 170) - button_height // 2 <= mouse_y <= (SCREEN_HEIGHT // 2 + 170) + button_height // 2)
         
         # Kiểm tra nếu con trỏ chuột nằm trên nút "Custom"
         custom_hovered = (SCREEN_WIDTH // 2 - button_width // 2 <= mouse_x <= SCREEN_WIDTH // 2 + button_width // 2 and
-                          (SCREEN_HEIGHT // 2 + 200) - button_height // 2 <= mouse_y <= (SCREEN_HEIGHT // 2 + 200) + button_height // 2)
+                          (SCREEN_HEIGHT // 2 + 255) - button_height // 2 <= mouse_y <= (SCREEN_HEIGHT // 2 + 255) + button_height // 2)
 
         draw_button(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, button_width, button_height, BLACK, button_radius, start_hovered)
         draw_text("Start", font, WHITE, SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
-        draw_button(SCREEN_WIDTH // 2,  (SCREEN_HEIGHT // 2) + 100, button_width, button_height, BLACK, button_radius, about_hovered)
-        draw_text("Options", font, WHITE, SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + 100)
+        draw_button(SCREEN_WIDTH // 2,  (SCREEN_HEIGHT // 2) + 85, button_width, button_height, BLACK, button_radius, PvP_hovered)
+        draw_text("PvP", font, WHITE, SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + 85)
 
-        draw_button(SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + 200, button_width, button_height, BLACK, button_radius, custom_hovered)
-        draw_text("Custom", font, WHITE, SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + 200)
+        draw_button(SCREEN_WIDTH // 2,  (SCREEN_HEIGHT // 2) + 170, button_width, button_height, BLACK, button_radius, about_hovered)
+        draw_text("PVB", font, WHITE, SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + 170)
+
+        draw_button(SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + 255, button_width, button_height, BLACK, button_radius, custom_hovered)
+        draw_text("Options", font, WHITE, SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + 255)
 
         pygame.display.update()
 
@@ -86,7 +94,13 @@ def main_menu():
                         SCREEN_HEIGHT // 2 - button_height // 2 <= mouse_y <= SCREEN_HEIGHT // 2 + button_height // 2):
                         select_character.main_menu()
                     elif (SCREEN_WIDTH // 2 - button_width // 2 <= mouse_x <= SCREEN_WIDTH // 2 + button_width // 2 and
-                          (SCREEN_HEIGHT // 2 + 100) - button_height // 2 <= mouse_y <= (SCREEN_HEIGHT // 2 + 100) + button_height // 2):
+                          (SCREEN_HEIGHT // 2 + 85) - button_height // 2 <= mouse_y <= (SCREEN_HEIGHT // 2 + 85) + button_height // 2):
+                        select_character_offline.main_menu()
+                    elif (SCREEN_WIDTH // 2 - button_width // 2 <= mouse_x <= SCREEN_WIDTH // 2 + button_width // 2 and
+                          (SCREEN_HEIGHT // 2 + 170) - button_height // 2 <= mouse_y <= (SCREEN_HEIGHT // 2 + 170) + button_height // 2):
+                        select_PVB.main_menu()
+                    elif (SCREEN_WIDTH // 2 - button_width // 2 <= mouse_x <= SCREEN_WIDTH // 2 + button_width // 2 and
+                          (SCREEN_HEIGHT // 2 + 255) - button_height // 2 <= mouse_y <= (SCREEN_HEIGHT // 2 + 255) + button_height // 2):
                         option_page.main_menu()
            
 if __name__ == "__main__":
